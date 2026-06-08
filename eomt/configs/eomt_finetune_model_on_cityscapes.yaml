@@ -22,14 +22,10 @@ model:
     mode: "last_n_blocks"
     num_classes: 19
     attn_mask_annealing_enabled: True
-    attn_mask_annealing_start_steps: [5920, 14836, 23752]  # Ho cambiato i valori, in particolare ho fatto in modo che start=[16.6%, 41.6%, 66.6%]
-    attn_mask_annealing_end_steps: [11876, 20792, 29708]   # mentre end=[33.3%, 58.3%, 83.3%]. Ogni valore è la percentuale relativa al totale di step che facciamo.
-    # Ho calcolato queste percentuali osservando che cityscapes ha 2975 immagini.
-    # Nel config della repo originale, si utilizzava batch_size=16, quindi 186 step per epoca, e con max_epochs=107 si facevano 19902 step. I valori di start ed end corrispondono
-    # alle percentuali definite sopra rispetto al numero totali di step.
-    # Noi utilizziamo un batch_size di 2 immagini, facciamo in totale 1486 step per epoca, e quindi considerando un massimo di 24 epoche, facciamo 35664 step.
-    # Applichiamo quelle percentuali agli step totali e ricaviamo i valori da inserire.
-    # Le percentuali che ho trovato sono le stesse se le calcolassi per il config di COCO che lavorava sul dataset di COCO, quindi direi che sono affidabili.
+    attn_mask_annealing_start_steps: [5920, 14836, 23752]  # start_steps=[16.6%, 41.6%, 66.6%] 
+    attn_mask_annealing_end_steps: [11876, 20792, 29708]   # end_steps=[33.3%, 58.3%, 83.3%]
+    # These percentages represents a ratio found in the configs for EoMT on Cityscapes and EoMT on COCO. By computing the ratio between the start/end steps and the 
+    # total steps, we found out that in both configs the ratio was constant. So we decided to reutilize it during the fine tuning.
     network:
       class_path: models.eomt.EoMT
       init_args:
