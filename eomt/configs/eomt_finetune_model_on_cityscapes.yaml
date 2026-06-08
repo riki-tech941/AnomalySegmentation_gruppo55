@@ -1,0 +1,47 @@
+trainer:
+  max_epochs: 24
+  logger:
+    class_path: lightning.pytorch.loggers.wandb.WandbLogger
+    init_args:
+      resume: allow
+      project: "eomt"
+      name: "finetune_coco_to_cityscapes"
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: "./checkpoints/finetuned"
+        filename: "eomt-cityscapes-{epoch:02d}-{metrics/val_iou_all:.4f}"
+        monitor: "metrics/val_iou_all"   # ← era "val/miou"
+        mode: "max"
+        save_top_k: 3
+        save_last: true
+        every_n_epochs: 1
+model:
+  class_path: finetuning_lightning_module.FinetuneLightningModule
+  init_args:
+    mode: "last_n_blocks"
+    num_classes: 19
+    attn_mask_annealing_enabled: True
+    attn_mask_annealing_start_steps: [5920, 14836, 23752]  # Ho cambiato i valori, in particolare ho fatto in modo che start=[16.6%, 41.6%, 66.6%]
+    attn_mask_annealing_end_steps: [11876, 20792, 29708]   # mentre end=[33.3%, 58.3%, 83.3%]. Ogni valore è la percentuale relativa al totale di step che facciamo.
+    # Ho calcolato queste percentuali osservando che cityscapes ha 2975 immagini.
+    # Nel config della repo originale, si utilizzava batch_size=16, quindi 186 step per epoca, e con max_epochs=107 si facevano 19902 step. I valori di start ed end corrispondono
+    # alle percentuali definite sopra rispetto al numero totali di step.
+    # Noi utilizziamo un batch_size di 2 immagini, facciamo in totale 1486 step per epoca, e quindi considerando un massimo di 24 epoche, facciamo 35664 step.
+    # Applichiamo quelle percentuali agli step totali e ricaviamo i valori da inserire.
+    # Le percentuali che ho trovato sono le stesse se le calcolassi per il config di COCO che lavorava sul dataset di COCO, quindi direi che sono affidabili.
+    network:
+      class_path: models.eomt.EoMT
+      init_args:
+        num_q: 200
+        num_blocks: 3
+        encoder:
+          class_path: models.vit.ViT
+          init_args:
+            backbone_name: vit_base_patch14_reg4_dinov2
+
+data:
+  class_path: datasets.cityscapes_semantic.CityscapesSemantic
+  init_args:
+    batch_size: 2
+    img_size: [640,640]
