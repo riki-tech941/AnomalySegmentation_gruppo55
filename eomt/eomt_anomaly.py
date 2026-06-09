@@ -95,7 +95,7 @@ def main():
 
     if "img_size" in config.get("data", {}) :
        IMG_SIZE = config["data"]["img_size"]
-    if "img_size" in config.get("data", {}).get("init_args") :
+    if "img_size" in config.get("data", {}).get("init_args", {}) :
        IMG_SIZE = config["data"]["init_args"]["img_size"]
     else :
        IMG_SIZE = (1024, 1024)
