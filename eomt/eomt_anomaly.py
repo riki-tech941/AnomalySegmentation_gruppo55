@@ -88,14 +88,14 @@ def main():
 
     if "num_classes" in config.get("data", {}) :
        NUM_CLASSES = config["data"]["num_classes"]
-    if "num_classes" in config.get("model", {}).get("init_args", {}) :
+    elif "num_classes" in config.get("model", {}).get("init_args", {}) :
        NUM_CLASSES = config["model"]["init_args"]["num_classes"]
     else :
        NUM_CLASSES = 19
 
     if "img_size" in config.get("data", {}) :
        IMG_SIZE = config["data"]["img_size"]
-    if "img_size" in config.get("data", {}).get("init_args", {}) :
+    elif "img_size" in config.get("data", {}).get("init_args", {}) :
        IMG_SIZE = config["data"]["init_args"]["img_size"]
     else :
        IMG_SIZE = (1024, 1024)
